@@ -5,188 +5,340 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Love Ticket ♡</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
 :root{
-  --pink:#FF91BD;
-  --deep:#F05B9B;
-  --bg:#FFF1F7;
-  --ink:#593B50;
-  --soft:#FFE0ED;
-  --purple:#D8BDF7;
-  --cream:#FFFAF2;
+  --pink:#ff91bd;
+  --deep:#ed5797;
+  --bg:#fff5fa;
+  --soft:#ffe2ef;
+  --ink:#70465d;
+  --muted:#b18c9f;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Kanit,sans-serif}
-main{max-width:480px;margin:auto;padding:22px 17px 50px}
-header{text-align:center;padding:22px 0}
-.logo{font-size:42px}
-h1{font-size:29px;margin:0;color:#ed5790}
-.sub{color:#a78b98;font-size:14px}
-.card{background:white;border-radius:23px;padding:20px;margin:14px 0;box-shadow:0 7px 25px #e9b5c526}
-h2{font-size:18px;margin:0 0 14px}
-input,button{font:inherit;width:100%;border-radius:13px;padding:13px 15px;margin:6px 0}
-input{border:1px solid #f2dce5;background:#fffafd;outline:none}
-input:focus{border-color:var(--pink)}
-button{border:0;background:var(--pink);color:white;font-weight:600;cursor:pointer}
-button.secondary{background:#fff0f5;color:#dc5488}
-button.dark{background:#493541}
-button:disabled{opacity:.45;cursor:not-allowed}
-.small{font-size:13px;color:#9b8490}
+body{
+  margin:0;
+  font-family:'Kanit',sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 10% 10%,#ffe0ed,transparent 30%),
+    radial-gradient(circle at 90% 40%,#f2e3ff,transparent 30%),
+    var(--bg);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+main{max-width:500px;margin:auto;padding:18px 17px 45px;position:relative;z-index:1}
+button,input{font:inherit}
+button{cursor:pointer;border:0}
 .hidden{display:none!important}
-.balance{text-align:center;background:linear-gradient(140deg,#ff9cbd,#f36c9e);color:white;border-radius:23px;padding:25px}
-.points{font-size:62px;font-weight:700;line-height:1.2}
-.progress{height:9px;border-radius:20px;background:#ffffff70;margin:15px 0 5px;overflow:hidden}
-.progress div{height:100%;background:white;border-radius:20px}
-.coupon{border:1px dashed #f2a2bf;border-radius:17px;padding:14px;margin:10px 0;background:#fffafd}
-.coupon strong{display:block;font-size:17px}
-.row{display:flex;gap:8px;align-items:center}
-.row button{flex:1}
-.pill{display:inline-block;background:#fff0f5;color:#d94e86;padding:5px 11px;border-radius:30px;font-size:12px}
-#message{padding:10px 13px;border-radius:12px;background:#fff0f5;color:#c34478;font-size:13px;white-space:pre-wrap}
-footer{text-align:center;color:#b59ba7;font-size:12px;padding:20px}
+.decor{
+  position:fixed;z-index:0;pointer-events:none;
+  opacity:.7;animation:float 5s ease-in-out infinite;
+}
+.d1{top:12%;left:3%;font-size:26px}
+.d2{top:28%;right:4%;font-size:23px;animation-delay:1s}
+.d3{top:62%;left:2%;font-size:25px;animation-delay:2s}
+.d4{top:78%;right:3%;font-size:25px;animation-delay:.5s}
+.d5{top:5%;right:18%;font-size:20px;animation-delay:1.5s}
+@keyframes float{
+  0%,100%{transform:translateY(0) rotate(-5deg)}
+  50%{transform:translateY(-13px) rotate(7deg)}
+}
+header{text-align:center;padding:18px 0 16px}
+.logo{font-size:39px;letter-spacing:5px}
+h1{font-size:34px;color:var(--deep);margin:0}
+.subtitle{font-size:13px;color:var(--muted)}
+.characters{font-size:31px;margin:13px 0;letter-spacing:8px}
+.tagline{
+  display:inline-block;background:white;border:1px solid var(--soft);
+  border-radius:30px;padding:6px 15px;font-size:11px;color:#d879a2;
+}
+.card{
+  background:#ffffffed;border:1px solid white;
+  border-radius:25px;padding:20px;margin:14px 0;
+  box-shadow:0 9px 28px #e9b5c526;
+}
+h2{font-size:18px;margin:0 0 12px;color:#85536e}
+.small{font-size:12px;color:var(--muted);line-height:1.7}
+input{
+  width:100%;padding:13px 15px;margin:6px 0;
+  border:1px solid #f4d9e5;border-radius:15px;
+  background:#fffafd;outline:none;color:var(--ink);
+}
+input:focus{border-color:var(--pink)}
+.btn{
+  width:100%;padding:13px 16px;border-radius:16px;
+  background:linear-gradient(120deg,#ff9fc5,#ef6ca2);
+  color:white;font-weight:600;margin:6px 0;
+  box-shadow:0 5px 13px #f28bb633;
+}
+.btn:active{transform:scale(.98)}
+.btn.secondary{background:#fff0f6;color:#d95b91;box-shadow:none}
+.btn.dark{background:#70516a;box-shadow:none}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+#message{
+  background:#fff0f6;color:#c44d81;border-radius:15px;
+  padding:12px 15px;font-size:13px;margin:10px 0;
+  border:1px solid #ffe0ed;white-space:pre-wrap;
+}
+.hero{
+  text-align:center;border-radius:28px;padding:23px 18px;
+  background:linear-gradient(145deg,#ff9fc5,#f16fa5);
+  color:white;box-shadow:0 12px 27px #ef8bbd45;
+  position:relative;overflow:hidden;
+}
+.hero:before,.hero:after{
+  content:"♡";position:absolute;color:#ffffff55;font-size:65px;
+}
+.hero:before{top:-15px;left:10px}
+.hero:after{bottom:-35px;right:10px}
+.hero-top{font-size:12px}
+.points{font-size:66px;font-weight:700;line-height:1.2}
+.progress-wrap{
+  background:#ffffff55;height:11px;border-radius:20px;
+  margin:15px 8px 7px;overflow:hidden;
+}
+.progress-fill{
+  height:100%;width:0%;background:white;border-radius:20px;
+  transition:width .5s;
+}
+.role-chip{
+  display:inline-block;background:#ffffff35;border-radius:30px;
+  padding:5px 12px;font-size:11px;margin-top:10px;
+}
+.mascot-box{
+  display:flex;align-items:center;justify-content:center;
+  gap:12px;background:#fff5fa;border:1px solid #ffe4ef;
+  border-radius:22px;padding:13px;margin:13px 0;
+}
+.mascot{font-size:43px;animation:bounce 2.5s infinite}
+@keyframes bounce{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-7px)}
+}
+.mascot-text{text-align:left;flex:1}
+.mascot-text strong{font-size:13px;color:#c65d8b}
+.mascot-text p{font-size:11px;color:var(--muted);margin:2px 0}
+.ticket-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pill{background:#fff0f6;color:#d65d91;padding:5px 11px;border-radius:30px;font-size:11px}
+.coupon{
+  background:#fff9fc;border:1.5px dashed #efa3c1;
+  border-radius:18px;padding:15px;margin:11px 0;
+  position:relative;overflow:hidden;
+}
+.coupon strong{display:block;font-size:16px;color:#bd5683}
+.ticket-stamp{display:inline-block;background:#ffe8f1;color:#d45d91;border-radius:7px;padding:3px 8px;font-size:10px;margin-bottom:7px}
+.empty{
+  text-align:center;background:#fff7fb;border-radius:18px;
+  padding:24px 12px;color:#bd91a6;font-size:12px;
+}
+.empty .emoji{font-size:35px;display:block;margin-bottom:6px}
+.divider{border:0;border-top:1px solid #f6e5ed;margin:18px 0}
+.code-box{
+  background:#fff5fa;border:1px dashed #eaa0bf;
+  border-radius:15px;padding:12px;text-align:center;
+  font-size:19px;color:#d34f88;letter-spacing:2px;font-weight:600;
+}
+.sparkle{text-align:center;font-size:20px;letter-spacing:8px;margin:8px}
+.footer{text-align:center;font-size:11px;color:#c6a3b4;padding:20px 0}
 </style>
 </head>
+
 <body>
+<div class="decor d1">🪽</div>
+<div class="decor d2">🐾</div>
+<div class="decor d3">🫧</div>
+<div class="decor d4">♡</div>
+<div class="decor d5">✨</div>
+
 <main>
 <header>
   <div class="logo">🎀💕</div>
   <h1>Love Ticket</h1>
-  <div class="sub">พื้นที่เล็ก ๆ สำหรับความรักของเรา ♡</div>
-  <div style="margin-top:12px; font-size:28px;">
-    🧸 💗 🐰
-  </div>
+  <div class="subtitle">our little love world</div>
+  <div class="characters">🧸 💗 🐰</div>
+  <div class="tagline">a tiny place made just for two ♡</div>
 </header>
 
 <div id="message" class="hidden"></div>
 
 <section id="auth" class="card">
- <h2 id="authTitle">ยินดีต้อนรับคนเก่ง 💗</h2>
- <input id="email" type="email" placeholder="อีเมลของเธอ">
- <input id="password" type="password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)">
- <button id="authButton" onclick="signUp()">สมัครสมาชิก</button>
- <button class="secondary" onclick="signIn()">มีบัญชีแล้ว? เข้าสู่ระบบ</button>
- <p class="small">สมัครด้วยอีเมลของตัวเองและยืนยันอีเมลก่อนเข้าใช้งาน หากระบบส่งอีเมลยืนยันมาให้</p>
+  <div class="sparkle">🪽 ✨ 🫧</div>
+  <h2 style="text-align:center">ยินดีต้อนรับสู่โลกของเรา 💗</h2>
+  <p class="small" style="text-align:center">สะสมความรัก แลกของขวัญ และสร้างความทรงจำไปด้วยกัน</p>
+  <input id="email" type="email" placeholder="อีเมลของเธอ">
+  <input id="password" type="password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)">
+  <button class="btn" onclick="signUp()">สมัครสมาชิก ♡</button>
+  <button class="btn secondary" onclick="signIn()">มีบัญชีแล้ว? เข้าสู่ระบบ</button>
+  <p class="small">หากระบบส่งอีเมลยืนยัน กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ</p>
 </section>
 
 <section id="pair" class="card hidden">
- <h2>มาเริ่มต้นกัน 💞</h2>
- <p class="small">ถ้ามึงเป็นคนเริ่มสร้างคู่ ให้สร้างรหัสใหม่ หรือถ้าแฟนสร้างไว้แล้ว ให้นำรหัสมาเข้าร่วม</p>
- <button onclick="createCouple()">สร้างคู่รักและรับรหัส</button>
- <div id="newCode" class="hidden coupon"></div>
- <hr style="border:0;border-top:1px solid #f5e3eb;margin:18px 0">
- <input id="inviteCode" placeholder="กรอกรหัสคู่รัก">
- <button class="secondary" onclick="joinCouple()">เข้าร่วมคู่รัก</button>
+  <div class="sparkle">🧸 💗 🐰</div>
+  <h2 style="text-align:center">มาเริ่มโลกของเรากัน 💞</h2>
+  <p class="small" style="text-align:center">สร้างรหัสคู่รัก หรือเข้าร่วมด้วยรหัสที่คนรักส่งให้</p>
+  <button class="btn" onclick="createCouple()">สร้างคู่รักและรับรหัส 💌</button>
+  <div id="newCode" class="hidden coupon"></div>
+  <hr class="divider">
+  <input id="inviteCode" placeholder="กรอกรหัสคู่รัก">
+  <button class="btn secondary" onclick="joinCouple()">เข้าร่วมคู่รัก ♡</button>
 </section>
 
 <section id="app" class="hidden">
- <div class="balance">
-  <div>ความรักที่สะสมได้ 💗</div>
-  <div class="points" id="balance">0</div>
-  <div>อีกนิดเดียวก็แลกรางวัลได้แล้ว 🎁</div>
-  <div class="progress"><div id="bar" style="width:0%"></div></div>
-  <div id="roleText" class="small" style="color:white"></div>
- </div>
-
- <div class="card">
-  <div class="row" style="justify-content:space-between">
-   <h2>🎁 คูปองของเรา</h2>
-   <span class="pill" id="couponCount">0 ใบ</span>
+  <div class="hero">
+    <div class="hero-top">♡ YOUR LOVE COLLECTION ♡</div>
+    <div class="points" id="balance">0</div>
+    <div>แต้มความรักที่สะสมได้ 💗</div>
+    <div class="progress-wrap"><div class="progress-fill" id="bar"></div></div>
+    <div class="small" id="pointHint" style="color:white">อีก 10 แต้มก็แลกรางวัลได้แล้ว!</div>
+    <div id="roleText" class="role-chip"></div>
   </div>
-  <div id="coupons"></div>
-  <div id="emptyCoupons" class="small">ยังไม่มีคูปอง รอคนรักสร้างให้นะ ♡</div>
- </div>
 
- <div id="giverPanel" class="card hidden">
-  <h2>💌 มอบแต้มให้คนรัก</h2>
-  <p class="small">เพิ่มได้ครั้งละ 1 แต้ม และยอดรวมต้องไม่เกิน 10 แต้ม</p>
-  <button onclick="givePoint()">＋ ให้ 1 แต้ม</button>
-  <hr style="border:0;border-top:1px solid #f5e3eb;margin:17px 0">
-  <h2>✨ สร้างคูปองรอบนี้</h2>
-  <input id="couponTitle" placeholder="ชื่อคูปอง เช่น กอดฟรี 1 ครั้ง">
-  <input id="couponDesc" placeholder="รายละเอียด (ถ้ามี)">
-  <button class="secondary" onclick="addCoupon()">เพิ่มคูปอง</button>
- </div>
+  <div class="mascot-box">
+    <div class="mascot">🧸</div>
+    <div class="mascot-text">
+      <strong id="mascotTitle">ยินดีต้อนรับคนเก่ง!</strong>
+      <p id="mascotMessage">ทุกแต้มคือความรักที่ค่อย ๆ สะสม ♡</p>
+    </div>
+    <div class="mascot">🐰</div>
+  </div>
 
- <div id="collectorPanel" class="card hidden">
-  <h2>💗 แลกคูปอง</h2>
-  <p class="small">เมื่อมีครบ 10 แต้ม เลือกคูปองที่ต้องการได้ 1 ใบ แต้มจะกลับเป็น 0 และคูปองที่เหลือในรอบนี้จะหมดอายุ</p>
- </div>
+  <div class="card">
+    <div class="ticket-head">
+      <h2>🎟️ กล่องของขวัญของเรา</h2>
+      <span class="pill" id="couponCount">0 ใบ</span>
+    </div>
+    <div id="coupons"></div>
+    <div id="emptyCoupons" class="empty">
+      <span class="emoji">🎁</span>
+      ยังไม่มีคูปองในกล่องเลย<br>รอคนรักสร้างเซอร์ไพรส์ให้นะ ♡
+    </div>
+  </div>
 
- <div class="card">
-  <h2>♡ พื้นที่ของเราสองคน</h2>
-  <p class="small">รหัสคู่รัก: <strong id="coupleCode">-</strong></p>
-  <button class="secondary" onclick="refresh()">รีเฟรชข้อมูล</button>
-  <button class="dark" onclick="signOut()">ออกจากระบบ</button>
- </div>
+  <div id="giverPanel" class="card hidden">
+    <div class="sparkle">💌 ✨ 💗</div>
+    <h2>ส่งความรักให้คนพิเศษ</h2>
+    <p class="small">มอบแต้มให้คนรักได้ครั้งละ 1 แต้ม สูงสุด 10 แต้ม</p>
+    <button class="btn" onclick="givePoint()">＋ มอบ 1 แต้มให้คนรัก</button>
+    <hr class="divider">
+    <h2>🎀 สร้างคูปองเซอร์ไพรส์</h2>
+    <p class="small">คิดของขวัญน่ารัก ๆ แล้วสร้างคูปองให้คนรักได้เลย</p>
+    <input id="couponTitle" placeholder="ชื่อคูปอง เช่น กอดฟรี 1 ครั้ง">
+    <input id="couponDesc" placeholder="รายละเอียดคูปอง (ถ้ามี)">
+    <button class="btn secondary" onclick="addCoupon()">＋ เพิ่มคูปองลงกล่อง</button>
+  </div>
+
+  <div id="collectorPanel" class="card hidden">
+    <div class="sparkle">🪽 🐾 🫧</div>
+    <h2>💗 ภารกิจสะสมความรัก</h2>
+    <p class="small">สะสมให้ครบ 10 แต้ม แล้วเลือกคูปองที่อยากแลกได้ 1 ใบ เมื่อแลกแล้ว แต้มจะกลับเป็น 0 และคูปองที่เหลือในรอบนี้จะหมดอายุตามระบบเดิม</p>
+    <div class="empty">
+      <span class="emoji">🐰</span>
+      <span id="collectorHint">ค่อย ๆ สะสมไปนะ ของขวัญรออยู่ปลายทาง ♡</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>♡ บ้านหลังเล็กของเราสองคน</h2>
+    <p class="small">รหัสคู่รักของเรา</p>
+    <div class="code-box" id="coupleCode">-</div>
+    <button class="btn secondary" onclick="copyCode()">คัดลอกรหัสคู่รัก</button>
+    <button class="btn secondary" onclick="refresh()">รีเฟรชข้อมูล ♡</button>
+    <button class="btn dark" onclick="signOut()">ออกจากระบบ</button>
+  </div>
 </section>
 
-<footer>made with love, just for two ♡</footer>
-</main>
+<div class="footer">made with love, just for two ♡<br>🪽 🐾 🫧 🎀</div>
 
 <script>
-const SUPABASE_URL = 'https://yphtguzgsohzfgtlciww.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_bTPuHAddO4PLSCPoe-oiTA_z2fGwuUK';
+const SUPABASE_URL = "https://yphtguzgsohzfgtlciww.supabase.co";
+const SUPABASE_KEY = "sb_publishable_bTPuHAddO4PLSCPoe-oiTA_z2fGwuUK";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
 let coupleId = null;
 let myRole = null;
-let balance = 0;
+let currentBalance = 0;
 
-function msg(text) {
-  const el = document.getElementById('message');
+const $ = (id) => document.getElementById(id);
+
+function showMessage(text, type = "info") {
+  const el = $("message");
+  if (!el) return;
   el.textContent = text;
-  el.classList.remove('hidden');
+  el.className = "message " + type;
+  el.style.display = "block";
 }
 
-function clearMsg() {
-  document.getElementById('message').classList.add('hidden');
+function hideMessage() {
+  const el = $("message");
+  if (el) el.style.display = "none";
 }
 
-function show(id) {
-  document.getElementById(id).classList.remove('hidden');
+function safe(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[char]));
 }
 
-function hide(id) {
-  document.getElementById(id).classList.add('hidden');
-}
-
-function safe(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({
-    '&':'&amp;', '<':'&lt;', '>':'&gt;',
-    '"':'&quot;', "'":'&#39;'
-  }[c]));
+function showSection(section) {
+  ["auth", "pair", "app"].forEach(id => {
+    if ($(id)) $(id).style.display = id === section ? "block" : "none";
+  });
 }
 
 async function signUp() {
-  clearMsg();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
+  hideMessage();
+  const email = $("email").value.trim();
+  const password = $("password").value;
 
-  if (!email || password.length < 6)
-    return msg('กรอกอีเมลและรหัสผ่านอย่างน้อย 6 ตัวก่อนนะ');
+  if (!email || !password) {
+    showMessage("กรอกอีเมลและรหัสผ่านก่อนน้า 💗", "error");
+    return;
+  }
 
-  const {data, error} = await db.auth.signUp({email, password});
-  if (error) return msg(error.message);
+  if (password.length < 6) {
+    showMessage("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษรนะ", "error");
+    return;
+  }
 
-  if (!data.session)
-    return msg('สมัครแล้ว กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ 💌');
+  const { error } = await db.auth.signUp({ email, password });
 
-  await start(data.user);
+  if (error) {
+    showMessage(error.message, "error");
+    return;
+  }
+
+  showMessage("สมัครสมาชิกเรียบร้อยแล้ว 💕 ถ้าระบบส่งอีเมลยืนยัน ให้กดยืนยันก่อนเข้าสู่ระบบนะ", "success");
 }
 
 async function signIn() {
-  clearMsg();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
+  hideMessage();
+  const email = $("email").value.trim();
+  const password = $("password").value;
 
-  const {data, error} = await db.auth.signInWithPassword({
-    email, password
+  if (!email || !password) {
+    showMessage("กรอกอีเมลและรหัสผ่านก่อนน้า 💗", "error");
+    return;
+  }
+
+  const { data, error } = await db.auth.signInWithPassword({
+    email,
+    password
   });
 
-  if (error) return msg(error.message);
-  await start(data.user);
+  if (error) {
+    showMessage(error.message, "error");
+    return;
+  }
+
+  currentUser = data.user;
+  await start(currentUser);
 }
 
 async function signOut() {
@@ -194,206 +346,323 @@ async function signOut() {
   currentUser = null;
   coupleId = null;
   myRole = null;
-  hide('app');
-  hide('pair');
-  show('auth');
-  clearMsg();
+  showSection("auth");
+  showMessage("ออกจากระบบแล้วนะ 💗", "success");
 }
 
 async function start(user) {
   currentUser = user;
-  clearMsg();
+  hideMessage();
 
-  const {data, error} = await db
-    .from('couple_members')
-    .select('couple_id, role')
-    .eq('user_id', user.id)
+  const { data: member, error } = await db
+    .from("couple_members")
+    .select("couple_id, role")
+    .eq("user_id", user.id)
     .maybeSingle();
 
-  if (error) return msg(error.message);
-
-  hide('auth');
-
-  if (!data) {
-    show('pair');
-    hide('app');
+  if (error) {
+    showMessage("โหลดข้อมูลคู่รักไม่สำเร็จ: " + error.message, "error");
     return;
   }
 
-  coupleId = data.couple_id;
-  myRole = data.role;
+  if (!member) {
+    showSection("pair");
+    return;
+  }
 
-  hide('pair');
-  show('app');
+  coupleId = member.couple_id;
+  myRole = member.role;
 
-  document.getElementById('giverPanel')
-    .classList.toggle('hidden', myRole !== 'giver');
+  showSection("app");
 
-  document.getElementById('collectorPanel')
-    .classList.toggle('hidden', myRole !== 'collector');
+  if ($("giverPanel")) {
+    $("giverPanel").style.display = myRole === "giver" ? "block" : "none";
+  }
 
-  document.getElementById('roleText').textContent =
-    myRole === 'giver' ? 'บทบาท: คนมอบแต้ม 💌' : 'บทบาท: คนสะสมแต้ม 💗';
+  if ($("collectorPanel")) {
+    $("collectorPanel").style.display = myRole === "collector" ? "block" : "none";
+  }
+
+  if ($("roleText")) {
+    $("roleText").textContent = myRole === "giver"
+      ? "บทบาทของมึง: คนมอบแต้ม 💝"
+      : "บทบาทของมึง: นักสะสมแต้ม 🐰";
+  }
 
   await refresh();
 }
 
 async function createCouple() {
-  clearMsg();
+  hideMessage();
 
-  const {error} = await db.rpc('create_love_couple');
-  if (error) return msg(error.message);
+  const { error } = await db.rpc("create_love_couple");
+
+  if (error) {
+    showMessage("สร้างคู่รักไม่สำเร็จ: " + error.message, "error");
+    return;
+  }
 
   await start(currentUser);
-  msg('สร้างคู่รักเรียบร้อยแล้ว 💗');
+  showMessage("สร้างคู่รักเรียบร้อยแล้ว 💗 ส่งรหัสให้แฟนมาเข้าคู่กันได้เลย", "success");
 }
 
 async function joinCouple() {
-  clearMsg();
-  const code = document.getElementById('inviteCode').value.trim();
+  hideMessage();
+  const code = $("inviteCode").value.trim();
 
-  if (!code) return msg('กรอกรหัสคู่รักก่อนนะ');
+  if (!code) {
+    showMessage("ใส่รหัสคู่รักก่อนน้า 💌", "error");
+    return;
+  }
 
-  const {error} = await db.rpc('join_love_couple', {
+  const { error } = await db.rpc("join_love_couple", {
     p_invite_code: code
   });
 
-  if (error) return msg(error.message);
+  if (error) {
+    showMessage("เข้าร่วมคู่รักไม่สำเร็จ: " + error.message, "error");
+    return;
+  }
 
   await start(currentUser);
-  msg('เข้าร่วมคู่รักสำเร็จแล้ว 💗');
+  showMessage("เข้าคู่รักสำเร็จแล้ว 💕", "success");
 }
 
 async function refresh() {
   if (!coupleId) return;
 
-  const [stateResult, couponResult, coupleResult] =
-    await Promise.all([
-      db.from('couple_state')
-        .select('balance')
-        .eq('couple_id', coupleId)
-        .single(),
+  const { data: state, error: stateError } = await db
+    .from("couple_state")
+    .select("balance")
+    .eq("couple_id", coupleId)
+    .maybeSingle();
 
-      db.from('coupons')
-        .select('id,title,description,is_active')
-        .eq('couple_id', coupleId)
-        .eq('is_active', true)
-        .order('created_at'),
+  if (stateError) {
+    showMessage("โหลดแต้มไม่สำเร็จ: " + stateError.message, "error");
+    return;
+  }
 
-      db.from('couples')
-        .select('invite_code')
-        .eq('id', coupleId)
-        .single()
-    ]);
+  currentBalance = Number(state?.balance ?? 0);
 
-  if (stateResult.error) return msg(stateResult.error.message);
-  if (couponResult.error) return msg(couponResult.error.message);
-  if (coupleResult.error) return msg(coupleResult.error.message);
+  if ($("balance")) $("balance").textContent = currentBalance;
+  if ($("bar")) $("bar").style.width = (currentBalance * 10) + "%";
 
-  balance = stateResult.data.balance || 0;
+  if ($("pointHint")) {
+    $("pointHint").textContent = currentBalance === 10
+      ? "ครบ 10 แต้มแล้ว! แลกคูปองได้เลย 🎟️"
+      : สะสมอีก ${10 - currentBalance} แต้ม เพื่อแลกรางวัลนะ;
+  }
 
-  document.getElementById('balance').textContent = balance;
-  document.getElementById('bar').style.width =
-    (balance * 10) + '%';
+  if ($("collectorHint")) {
+    $("collectorHint").textContent = currentBalance === 10
+      ? "ถึงเวลาเลือกคูปองที่อยากแลกแล้ว 💗"
+      : "เก็บแต้มให้ครบ 10 ก่อน แล้วมาเลือกคูปองกัน!";
+  }
 
-  document.getElementById('coupleCode').textContent =
-    coupleResult.data.invite_code || '-';
+  const { data: coupons, error: couponError } = await db
+    .from("coupons")
+    .select("*")
+    .eq("couple_id", coupleId)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
 
-  const list = couponResult.data || [];
+  if (couponError) {
+    showMessage("โหลดคูปองไม่สำเร็จ: " + couponError.message, "error");
+    return;
+  }
 
-  document.getElementById('couponCount').textContent =
-    list.length + ' ใบ';
+  renderCoupons(coupons || []);
 
-  document.getElementById('emptyCoupons')
-    .classList.toggle('hidden', list.length > 0);
+  const { data: couple } = await db
+    .from("couples")
+    .select("invite_code")
+    .eq("id", coupleId)
+    .maybeSingle();
 
-  renderCoupons(list);
+  if (couple?.invite_code) {
+    if ($("coupleCode")) $("coupleCode").textContent = couple.invite_code;
+    if ($("newCode")) $("newCode").textContent = couple.invite_code;
+  }
+
+  updateMascot();
 }
 
-function renderCoupons(list) {
-  const container = document.getElementById('coupons');
+function updateMascot() {
+  const title = $("mascotTitle");
+  const message = $("mascotMessage");
 
-  container.innerHTML = list.map(c => `
-    <div class="coupon">
-      <strong>🎟️ ${safe(c.title)}</strong>
-      <div class="small">
-        ${safe(c.description || 'คูปองพิเศษสำหรับคนรัก')}
+  if (!title || !message) return;
+
+  if (currentBalance === 10) {
+    title.textContent = "เก่งมาก! ครบ 10 แต้มแล้ว 🎀";
+    message.textContent = "น้องหมีและน้องกระต่ายพร้อมพาไปแลกคูปองแล้ว!";
+  } else if (currentBalance >= 5) {
+    title.textContent = "ใกล้ถึงรางวัลแล้วนะ 💕";
+    message.textContent = "สะสมต่ออีกนิดเดียว น้อง ๆ รอฉลองอยู่!";
+  } else {
+    title.textContent = "ยินดีต้อนรับนักสะสม!";
+    message.textContent = "ค่อย ๆ เก็บแต้มไปด้วยกันนะ 🧸🐰";
+  }
+}
+
+function renderCoupons(coupons) {
+  const container = $("coupons");
+  if (!container) return;
+
+  if ($("couponCount")) {
+    $("couponCount").textContent = coupons.length;
+  }
+
+  if ($("emptyCoupons")) {
+    $("emptyCoupons").style.display = coupons.length ? "none" : "block";
+  }
+
+  container.innerHTML = coupons.map(coupon => {
+    const canRedeem = myRole === "collector" && currentBalance === 10;
+
+    return `
+      <div class="ticket">
+        <div class="ticket-top">
+          <span>🎟️ LOVE TICKET</span>
+          <span>♡</span>
+        </div>
+        <h3>${safe(coupon.title)}</h3>
+        <p>${safe(coupon.description || "คูปองพิเศษสำหรับคนพิเศษ 💗")}</p>
+        ${
+          myRole === "collector"
+            ? `<button class="primary-btn" ${canRedeem ? "" : "disabled"}
+                onclick="redeemCoupon('${safe(coupon.id)}')">
+                ${canRedeem ? "แลกคูปองใบนี้ 💝" : "ใช้ 10 แต้มเพื่อแลก"}
+              </button>`
+            : <div class="ticket-note">คูปองพร้อมให้คนรักมาแลก 💕</div>
+        }
       </div>
-      ${
-        myRole === 'collector'
-        ? `<button ${balance === 10 ? '' : 'disabled'}
-            onclick="redeem('${safe(c.id)}')">
-            ${balance === 10 ? 'แลกคูปองใบนี้ 💗' : 'ต้องมี 10 แต้มก่อน'}
-          </button>`
-        : '<span class="small">คูปองสำหรับคนรัก ♡</span>'
-      }
-    </div>
-  `).join('');
+    `;
+  }).join("");
 }
 
 async function givePoint() {
-  if (myRole !== 'giver') return;
-  if (balance >= 10) return msg('แต้มเต็ม 10 แล้ว 💗');
+  if (myRole !== "giver") return;
 
-  const {error} = await db.rpc('grant_love_points', {
+  if (currentBalance >= 10) {
+    showMessage("แต้มเต็ม 10 แล้ว รอให้แฟนแลกก่อนนะ 💗", "error");
+    return;
+  }
+
+  const { error } = await db.rpc("grant_love_points", {
     p_couple_id: coupleId,
     p_amount: 1
   });
 
-  if (error) return msg(error.message);
+  if (error) {
+    showMessage("เพิ่มแต้มไม่สำเร็จ: " + error.message, "error");
+    return;
+  }
 
+  showMessage("ส่งแต้มให้แฟนแล้ว 1 แต้ม 💕", "success");
   await refresh();
-  msg('มอบแต้มให้คนรักแล้ว 1 แต้ม 💗');
 }
 
 async function addCoupon() {
-  if (myRole !== 'giver') return;
+  if (myRole !== "giver") return;
 
-  const title = document.getElementById('couponTitle').value.trim();
-  const description = document.getElementById('couponDesc').value.trim();
+  const title = $("couponTitle").value.trim();
+  const description = $("couponDesc").value.trim();
 
-  if (!title) return msg('ใส่ชื่อคูปองก่อนนะ');
+  if (!title) {
+    showMessage("ตั้งชื่อคูปองก่อนน้า 🎀", "error");
+    return;
+  }
 
-  const {error} = await db.from('coupons').insert({
-    couple_id: coupleId,
-    title,
-    description,
-    is_active: true
-  });
+  const { error } = await db
+    .from("coupons")
+    .insert([{
+      couple_id: coupleId,
+      title,
+      description,
+      is_active: true
+    }]);
 
-  if (error) return msg(error.message);
+  if (error) {
+    showMessage("เพิ่มคูปองไม่สำเร็จ: " + error.message, "error");
+    return;
+  }
 
-  document.getElementById('couponTitle').value = '';
-  document.getElementById('couponDesc').value = '';
+  $("couponTitle").value = "";
+  $("couponDesc").value = "";
 
+  showMessage("เพิ่มคูปองใหม่เรียบร้อยแล้ว 🎟️", "success");
   await refresh();
-  msg('เพิ่มคูปองเรียบร้อยแล้ว 🎁');
 }
 
-async function redeem(id) {
-  if (balance !== 10) return msg('ต้องมี 10 แต้มก่อนนะ');
+async function redeemCoupon(id) {
+  if (myRole !== "collector") return;
 
-  if (!confirm('ยืนยันแลกคูปองนี้ใช่ไหม? แต้มจะกลับเป็น 0'))
+  if (currentBalance !== 10) {
+    showMessage("ต้องมีครบ 10 แต้มก่อนถึงจะแลกได้นะ 💗", "error");
     return;
+  }
 
-  const {error} = await db.rpc('redeem_love_coupon', {
+  const confirmed = confirm("อยากแลกคูปองใบนี้ใช่ไหม? ใช้ 10 แต้มเลยนะ 💝");
+  if (!confirmed) return;
+
+  const { error } = await db.rpc("redeem_love_coupon", {
     p_couple_id: coupleId,
     p_coupon_id: id
   });
 
-  if (error) return msg(error.message);
+  if (error) {
+    showMessage("แลกคูปองไม่สำเร็จ: " + error.message, "error");
+    return;
+  }
 
+  showMessage("แลกคูปองสำเร็จแล้ว! ขอให้มีความสุขกับรางวัลนะ 💕", "success");
   await refresh();
-  msg('แลกคูปองสำเร็จแล้ว 💕');
 }
 
-db.auth.getSession().then(({data}) => {
-  if (data.session) {
-    start(data.session.user);
-  } else {
-    show('auth');
+async function copyCode() {
+  const code = $("coupleCode")?.textContent?.trim();
+
+  if (!code || code === "-") {
+    showMessage("ยังไม่มีรหัสคู่รักให้คัดลอกนะ", "error");
+    return;
   }
-});
+
+  try {
+    await navigator.clipboard.writeText(code);
+    showMessage("คัดลอกรหัสคู่รักแล้ว 💌", "success");
+  } catch (error) {
+    showMessage("คัดลอกไม่สำเร็จ ลองเลือกและคัดลอกรหัสด้วยตัวเองนะ", "error");
+  }
+}
+
+window.signUp = signUp;
+window.signIn = signIn;
+window.signOut = signOut;
+window.createCouple = createCouple;
+window.joinCouple = joinCouple;
+window.refresh = refresh;
+window.givePoint = givePoint;
+window.addCoupon = addCoupon;
+window.redeemCoupon = redeemCoupon;
+window.copyCode = copyCode;
+
+(async function init() {
+  const { data, error } = await db.auth.getSession();
+
+  if (error) {
+    showMessage("ตรวจสอบสถานะเข้าสู่ระบบไม่สำเร็จ", "error");
+    return;
+  }
+
+  const user = data.session?.user;
+
+  if (user) {
+    await start(user);
+  } else {
+    showSection("auth");
+  }
+})();
 </script>
 </body>
 </html>
