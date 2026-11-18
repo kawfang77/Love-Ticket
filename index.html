@@ -132,140 +132,267 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let coupleId = null;
 let myRole = null;
+let balance = 0;
 
-function msg(text){
- const el=document.getElementById('message');
- el.textContent=text;
- el.classList.remove('hidden');
-}
-function clearMsg(){document.getElementById('message').classList.add('hidden')}
-function show(id){document.getElementById(id).classList.remove('hidden')}
-function hide(id){document.getElementById(id).classList.add('hidden')}
-function safe(s){
- return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function msg(text) {
+  const el = document.getElementById('message');
+  el.textContent = text;
+  el.classList.remove('hidden');
 }
 
-async function signUp(){
- clearMsg();
- const email=document.getElementById('email').value.trim();
- const password=document.getElementById('password').value;
- if(!email||password.length<6)return msg('กรอกอีเมลและรหัสผ่านอย่างน้อย 6 ตัวก่อนนะ');
- const {data,error}=await db.auth.signUp({email,password});
- if(error)return msg(error.message);
- if(!data.session)msg('สมัครแล้ว! ไปยืนยันอีเมลจากกล่องจดหมายก่อน แล้วกลับมาเข้าสู่ระบบนะ 💌');
- else await start(data.session.user);
+function clearMsg() {
+  document.getElementById('message').classList.add('hidden');
 }
 
-async function signIn(){
- clearMsg();
- const email=document.getElementById('email').value.trim();
- const password=document.getElementById('password').value;
- const {data,error}=await db.auth.signInWithPassword({email,password});
- if(error)return msg(error.message);
- await start(data.user);
+function show(id) {
+  document.getElementById(id).classList.remove('hidden');
 }
 
-async function signOut(){
- await db.auth.signOut();
- currentUser=null;coupleId=null;myRole=null;
- hide('app');hide('pair');show('auth');clearMsg();
+function hide(id) {
+  document.getElementById(id).classList.add('hidden');
 }
 
-async function start(user){
- currentUser=user;
- hide('auth');clearMsg();
- const {data,error}=await db.from('couple_members')
-  .select('couple_id,role').eq('user_id',user.id).maybeSingle();
- if(error)return msg('โหลดข้อมูลบัญชีไม่สำเร็จ: '+error.message);
- if(!data){show('pair');hide('app');return}
- coupleId=data.couple_id;myRole=data.role;
- hide('pair');show('app');
- document.getElementById('giverPanel').classList.toggle('hidden',myRole!=='giver');
- document.getElementById('collectorPanel').classList.toggle('hidden',myRole!=='collector');
- document.getElementById('roleText').textContent=myRole==='giver'?'บทบาท: คนมอบแต้ม 💌':'บทบาท: คนสะสมแต้ม 💗';
- await refresh();
+function safe(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;',
+    '"':'&quot;', "'":'&#39;'
+  }[c]));
 }
 
-async function createCouple(){
- clearMsg();
- const {data,error}=await db.rpc('create_love_couple');
- if(error)return msg(error.message);
- const result=Array.isArray(data)?data[0]:data;
- if(!result)return msg('สร้างคู่ไม่สำเร็จ ลองอีกครั้งนะ');
- document.getElementById('newCode').innerHTML=
-  '<strong>รหัสคู่รักของเรา</strong><div style="font-size:25px;letter-spacing:3px">'+safe(result.invite_code)+'</div><p class="small">ส่งรหัสนี้ให้แฟนใช้เข้าร่วม</p>';
- show('newCode');
- await start(currentUser);
+async function signUp() {
+  clearMsg();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!email || password.length < 6)
+    return msg('กรอกอีเมลและรหัสผ่านอย่างน้อย 6 ตัวก่อนนะ');
+
+  const {data, error} = await db.auth.signUp({email, password});
+  if (error) return msg(error.message);
+
+  if (!data.session)
+    return msg('สมัครแล้ว กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ 💌');
+
+  await start(data.user);
 }
 
-async function joinCouple(){
- clearMsg();
- const code=document.getElementById('inviteCode').value.trim();
- if(!code)return msg('กรอกรหัสคู่รักก่อนนะ');
- const {error}=await db.rpc('join_love_couple',{p_invite_code:code});
- if(error)return msg(error.message);
- msg('เข้าร่วมคู่รักสำเร็จแล้ว 💗');
- await start(currentUser);
+async function signIn() {
+  clearMsg();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  const {data, error} = await db.auth.signInWithPassword({
+    email, password
+  });
+
+  if (error) return msg(error.message);
+  await start(data.user);
 }
 
-async function refresh(){
- if(!coupleId)return;
- clearMsg();
- const [stateResult,couponResult,coupleResult]=await Promise.all([
-  db.from('couple_state').select('balance').eq('couple_id',coupleId).single(),
-  db.from('coupons').select('id,title,description,is_active').eq('couple_id',coupleId).eq('is_active',true).order('created_at'),
-  db.from('couples').select('invite_code').eq('id',coupleId).single()
- ]);
- if(stateResult.error)return msg(stateResult.error.message);
- if(couponResult.error)return msg(couponResult.error.message);
- if(coupleResult.error)return msg(coupleResult.error.message);
-
- const balance=stateResult.data.balance;
- document.getElementById('balance').textContent=balance;
- document.getElementById('bar').style.width=(balance*10)+'%';
- document.getElementById('coupleCode').textContent=coupleResult.data.invite_code||'-';
-
- const list=couponResult.data||[];
- document.getElementById('couponCount').textContent=list.length+' ใบ';
- document.getElementById('emptyCoupons').classList.toggle('hidden',list.length>0);
- document.getElementById('coupons').innerHTML=list.map(c=>
-  '<div class="coupon"><strong>🎟️ '+safe(c.title)+'</strong>'+
-  '<div class="small">'+safe(c.description||'คูปองพิเศษสำหรับคนรัก')+'</div>'+
-  (myRole==='collector'
-   ?'<button '+(balance===10?'':'disabled')+' onclick="redeem(\''+c.id+'\')">'+(balance===10?'เลือกคูปองใบนี้':'ต้องมี 10 แต้มก่อน')+'</button>'
-   :'')+'</div>'
- ).join('');
+async function signOut() {
+  await db.auth.signOut();
+  currentUser = null;
+  coupleId = null;
+  myRole = null;
+  hide('app');
+  hide('pair');
+  show('auth');
+  clearMsg();
 }
 
-async function givePoint(){
- const {error}=await db.rpc('grant_love_points',{p_couple_id:coupleId,p_amount:1});
- if(error)return msg(error.message);
- msg('มอบแต้มให้คนรักแล้ว 💗');
- await refresh();
+async function start(user) {
+  currentUser = user;
+  clearMsg();
+
+  const {data, error} = await db
+    .from('couple_members')
+    .select('couple_id, role')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (error) return msg(error.message);
+
+  hide('auth');
+
+  if (!data) {
+    show('pair');
+    hide('app');
+    return;
+  }
+
+  coupleId = data.couple_id;
+  myRole = data.role;
+
+  hide('pair');
+  show('app');
+
+  document.getElementById('giverPanel')
+    .classList.toggle('hidden', myRole !== 'giver');
+
+  document.getElementById('collectorPanel')
+    .classList.toggle('hidden', myRole !== 'collector');
+
+  document.getElementById('roleText').textContent =
+    myRole === 'giver' ? 'บทบาท: คนมอบแต้ม 💌' : 'บทบาท: คนสะสมแต้ม 💗';
+
+  await refresh();
 }
 
-async function addCoupon(){
- const title=document.getElementById('couponTitle').value.trim();
- const description=document.getElementById('couponDesc').value.trim();
- if(!title)return msg('ใส่ชื่อคูปองก่อนนะ');
- const {error}=await db.from('coupons').insert({couple_id:coupleId,title,description});
- if(error)return msg(error.message);
- document.getElementById('couponTitle').value='';
- document.getElementById('couponDesc').value='';
- msg('เพิ่มคูปองแล้ว 🎁');
- await refresh();
+async function createCouple() {
+  clearMsg();
+
+  const {error} = await db.rpc('create_love_couple');
+  if (error) return msg(error.message);
+
+  await start(currentUser);
+  msg('สร้างคู่รักเรียบร้อยแล้ว 💗');
 }
 
-async function redeem(id){
- if(!confirm('ยืนยันเลือกคูปองนี้ใช่ไหม? แต้มจะกลับเป็น 0 และคูปองอื่นในรอบนี้จะหมดอายุ'))return;
- const {error}=await db.rpc('redeem_love_coupon',{p_couple_id:coupleId,p_coupon_id:id});
- if(error)return msg(error.message);
- msg('แลกคูปองสำเร็จแล้ว! ขอให้มีความสุขนะ 💕');
- await refresh();
+async function joinCouple() {
+  clearMsg();
+  const code = document.getElementById('inviteCode').value.trim();
+
+  if (!code) return msg('กรอกรหัสคู่รักก่อนนะ');
+
+  const {error} = await db.rpc('join_love_couple', {
+    p_invite_code: code
+  });
+
+  if (error) return msg(error.message);
+
+  await start(currentUser);
+  msg('เข้าร่วมคู่รักสำเร็จแล้ว 💗');
 }
 
-db.auth.getSession().then(({data})=>{
- if(data.session)start(data.session.user);
+async function refresh() {
+  if (!coupleId) return;
+
+  const [stateResult, couponResult, coupleResult] =
+    await Promise.all([
+      db.from('couple_state')
+        .select('balance')
+        .eq('couple_id', coupleId)
+        .single(),
+
+      db.from('coupons')
+        .select('id,title,description,is_active')
+        .eq('couple_id', coupleId)
+        .eq('is_active', true)
+        .order('created_at'),
+
+      db.from('couples')
+        .select('invite_code')
+        .eq('id', coupleId)
+        .single()
+    ]);
+
+  if (stateResult.error) return msg(stateResult.error.message);
+  if (couponResult.error) return msg(couponResult.error.message);
+  if (coupleResult.error) return msg(coupleResult.error.message);
+
+  balance = stateResult.data.balance || 0;
+
+  document.getElementById('balance').textContent = balance;
+  document.getElementById('bar').style.width =
+    (balance * 10) + '%';
+
+  document.getElementById('coupleCode').textContent =
+    coupleResult.data.invite_code || '-';
+
+  const list = couponResult.data || [];
+
+  document.getElementById('couponCount').textContent =
+    list.length + ' ใบ';
+
+  document.getElementById('emptyCoupons')
+    .classList.toggle('hidden', list.length > 0);
+
+  renderCoupons(list);
+}
+
+function renderCoupons(list) {
+  const container = document.getElementById('coupons');
+
+  container.innerHTML = list.map(c => `
+    <div class="coupon">
+      <strong>🎟️ ${safe(c.title)}</strong>
+      <div class="small">
+        ${safe(c.description || 'คูปองพิเศษสำหรับคนรัก')}
+      </div>
+      ${
+        myRole === 'collector'
+        ? `<button ${balance === 10 ? '' : 'disabled'}
+            onclick="redeem('${safe(c.id)}')">
+            ${balance === 10 ? 'แลกคูปองใบนี้ 💗' : 'ต้องมี 10 แต้มก่อน'}
+          </button>`
+        : '<span class="small">คูปองสำหรับคนรัก ♡</span>'
+      }
+    </div>
+  `).join('');
+}
+
+async function givePoint() {
+  if (myRole !== 'giver') return;
+  if (balance >= 10) return msg('แต้มเต็ม 10 แล้ว 💗');
+
+  const {error} = await db.rpc('grant_love_points', {
+    p_couple_id: coupleId,
+    p_amount: 1
+  });
+
+  if (error) return msg(error.message);
+
+  await refresh();
+  msg('มอบแต้มให้คนรักแล้ว 1 แต้ม 💗');
+}
+
+async function addCoupon() {
+  if (myRole !== 'giver') return;
+
+  const title = document.getElementById('couponTitle').value.trim();
+  const description = document.getElementById('couponDesc').value.trim();
+
+  if (!title) return msg('ใส่ชื่อคูปองก่อนนะ');
+
+  const {error} = await db.from('coupons').insert({
+    couple_id: coupleId,
+    title,
+    description,
+    is_active: true
+  });
+
+  if (error) return msg(error.message);
+
+  document.getElementById('couponTitle').value = '';
+  document.getElementById('couponDesc').value = '';
+
+  await refresh();
+  msg('เพิ่มคูปองเรียบร้อยแล้ว 🎁');
+}
+
+async function redeem(id) {
+  if (balance !== 10) return msg('ต้องมี 10 แต้มก่อนนะ');
+
+  if (!confirm('ยืนยันแลกคูปองนี้ใช่ไหม? แต้มจะกลับเป็น 0'))
+    return;
+
+  const {error} = await db.rpc('redeem_love_coupon', {
+    p_couple_id: coupleId,
+    p_coupon_id: id
+  });
+
+  if (error) return msg(error.message);
+
+  await refresh();
+  msg('แลกคูปองสำเร็จแล้ว 💕');
+}
+
+db.auth.getSession().then(({data}) => {
+  if (data.session) {
+    start(data.session.user);
+  } else {
+    show('auth');
+  }
 });
 </script>
 </body>
