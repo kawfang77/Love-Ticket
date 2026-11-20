@@ -48,6 +48,16 @@ returns boolean language sql stable as $$
   select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false)
 $$;
 
+-- Old versions of these functions may have a different return type.
+-- Drop only the matching Love Ticket function signatures, then recreate them below.
+drop function if exists public.admin_grant_love_points(uuid, integer);
+drop function if exists public.admin_grant_love_stamps(uuid, integer);
+drop function if exists public.complete_love_daily_mission(uuid, text);
+drop function if exists public.admin_create_love_coupon(uuid, text, text, text);
+drop function if exists public.redeem_love_stamps(uuid, uuid);
+drop function if exists public.reveal_special_love_coupon(uuid);
+drop function if exists public.admin_love_overview();
+
 create or replace function public.admin_grant_love_points(p_couple_id uuid, p_amount integer)
 returns void language plpgsql security definer set search_path = public as $$
 begin
