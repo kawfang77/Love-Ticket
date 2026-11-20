@@ -296,8 +296,7 @@
           <h2>💞 คะแนนความสัมพันธ์</h2>
           <div class="stamp-count"><span id="relationshipScore">0</span>/100</div>
           <p class="small">บันทึกคะแนนร่วมกันระหว่างเราสองคน</p>
-          <input class="input" id="relationshipInput" type="number" min="0" max="100" placeholder="คะแนน 0–100">
-          <button class="btn alt" onclick="saveRelationshipScore()">บันทึกคะแนน</button>
+          <p class="small">คะแนนเพิ่มโดยระบบ: แอดมินมอบแต้ม +5 ต่อแต้ม, เพิ่มแสตมป์ +10 ต่อดวง และภารกิจรายวัน +2.5</p>
         </section>
       </div>
 
@@ -414,11 +413,22 @@
       `).join('');
     }
 
-    function completeQuest(id){
+    async function completeQuest(id){
       const store=JSON.parse(
         localStorage.getItem('love-ticket-quests')||
         '{"day":"","done":{}}'
       );
+
+      try{
+        const {data,error}=await db.rpc('complete_love_daily_mission',{
+          p_couple_id:coupleId,
+          p_mission_key:id
+        });
+        if(error)throw error;
+        if(!data)return msg('ภารกิจนี้รับคะแนนความสัมพันธ์ไปแล้ววันนี้');
+      }catch(error){
+        return msg('บันทึกภารกิจไม่สำเร็จ: '+error.message);
+      }
 
       store.day=day;
       store.done[id]=true;
@@ -426,8 +436,9 @@
       localStorage.setItem('love-ticket-quests',JSON.stringify(store));
 
       hearts();
-      msg('เยี่ยมมาก! บันทึกภารกิจแล้ว ภารกิจนี้ไม่มีการเพิ่มแต้มอัตโนมัติ ♡',true);
+      msg('เยี่ยมมาก! ได้คะแนนความสัมพันธ์ +2.5 โดยไม่เพิ่มแต้มความรัก ♡',true);
       renderQuests();
+      loadStampAndScore();
     }
 
     async function signUp(){

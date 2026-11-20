@@ -41,3 +41,8 @@ create policy "Members can upload diary photos" on storage.objects
 for insert to authenticated with check (bucket_id = 'love-diary' and (storage.foldername(name))[1] in (select couple_id::text from public.couple_members where user_id = auth.uid()));
 create policy "Anyone can view diary photos" on storage.objects
 for select using (bucket_id = 'love-diary');
+
+-- Designate the requested account as the Love Ticket administrator.
+update auth.users
+set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || '{"role":"admin"}'::jsonb
+where id = 'd1ae4d14-9ecc-435d-a239-ad65d8314f1e';
