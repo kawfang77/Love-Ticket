@@ -446,14 +446,17 @@
     }
 
     async function signIn(){
-      const {data,error}=await db.auth.signInWithPassword({
-        email:$('email').value.trim(),
-        password:$('password').value
-      });
-
-      if(error)return msg(error.message);
-
-      start(data.user);
+      const email=$('email').value.trim();
+      const password=$('password').value;
+      if(!email||!password)return msg('กรอกอีเมลและรหัสผ่านก่อนนะ');
+      try{
+        const {data,error}=await db.auth.signInWithPassword({email,password});
+        if(error)return msg('เข้าสู่ระบบไม่สำเร็จ: '+error.message);
+        if(!data?.user)return msg('ไม่พบข้อมูลผู้ใช้หลังเข้าสู่ระบบ ลองใหม่อีกครั้ง');
+        await start(data.user);
+      }catch(error){
+        msg('เชื่อมต่อระบบไม่ได้: '+(error?.message||'เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ'));
+      }
     }
 
     async function signOut(){
@@ -1040,11 +1043,14 @@
     });
 
     (async()=>{
-      const {data}=await db.auth.getSession();
-
-      data.session?.user
-        ?start(data.session.user)
-        :show('auth');
+      try{
+        const {data,error}=await db.auth.getSession();
+        if(error)throw error;
+        data.session?.user ? await start(data.session.user) : show('auth');
+      }catch(error){
+        show('auth');
+        msg('เปิดหน้าเว็บได้ แต่เชื่อมต่อระบบเข้าสู่ระบบไม่ได้: '+(error?.message||''));
+      }
     })();
   </script>
 </body>
