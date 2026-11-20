@@ -60,7 +60,7 @@
     .btn{width:100%;margin:5px 0;padding:12px 15px;border-radius:14px;color:#fff;font-weight:600;background:linear-gradient(135deg,#ff88ba,#ea5493);box-shadow:0 8px 17px #ed6a9d45}
     .btn.alt{background:#fff0f6;color:#d44d86;box-shadow:none}
     .btn.dark{background:#624459;box-shadow:none}
-    .message{position:sticky;top:8px;z-index:5;margin:8px 0;padding:11px 13px;border-radius:13px;font-size:.83rem;background:#fff0f6;color:#bd4376;border:1px solid #ffd4e4}
+    .message{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:60;width:min(430px,calc(100% - 28px));padding:13px 16px;border-radius:15px;font-size:.86rem;background:#fff0f6;color:#bd4376;border:1px solid #ffd4e4;box-shadow:0 12px 25px #6930442a}
     .message.success{background:#e8fff3;color:#24825c;border-color:#c9f3dd}
 
     .score{display:grid;grid-template-columns:1.15fr .85fr;gap:15px}
@@ -97,6 +97,7 @@
     .coupon p{margin:0;color:var(--muted);font-size:.78rem}
     .coupon button{margin-top:10px;background:#ef619c;color:#fff;padding:8px 10px;border-radius:10px;font-size:.75rem;font-weight:600}
     .coupon button:disabled{background:#e7cbd8}
+    .coupon.special{background:radial-gradient(circle at 20% 0,#fff8c5,transparent 39%),linear-gradient(145deg,#6d4c13,#d49b28 50%,#76510b);border:1px solid #ffe99d;color:#fff;box-shadow:0 10px 23px #9b6c193a}.coupon.special .coupon-top,.coupon.special p{color:#fff6}.coupon.special h3{color:#fff}.coupon.special .secret-mark{display:grid;place-items:center;min-height:95px;margin:9px 0;border-radius:11px;border:1px dashed #fff9;background:#24160633;color:#fff;text-align:center;font:700 .9rem "DM Sans";letter-spacing:.12em}.coupon.special button{background:#fff4c9;color:#714d0b}.scratch-modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:18px;background:#3c1f2b99;backdrop-filter:blur(4px)}.scratch-card{width:min(430px,100%);padding:22px;border-radius:25px;text-align:center;background:linear-gradient(145deg,#fff8da,#f6c957);box-shadow:0 18px 50px #1e0c1466}.scratch-card h2{color:#74500d}.scratch-pad{position:relative;min-height:150px;margin:16px 0;border-radius:14px;overflow:hidden;background:#fffdf7}.scratch-reward{display:grid;place-items:center;min-height:150px;padding:18px;color:#744c08;font-weight:700}.scratch-cover{position:absolute;inset:0;display:grid;place-items:center;background:repeating-linear-gradient(135deg,#b1a8a2 0 8px,#d7d0c9 8px 16px);color:#fff;font:700 .85rem "DM Sans";letter-spacing:.1em;cursor:pointer;user-select:none}.scratch-cover.revealed{animation:scratchOff .75s forwards;pointer-events:none}@keyframes scratchOff{to{clip-path:circle(0 at 50% 50%);opacity:0}}
     .empty{color:var(--muted);text-align:center;padding:23px;font-size:.83rem;background:#fff8fb;border-radius:17px}
     .code{font:700 1.35rem "DM Sans";letter-spacing:.12em;color:#d54784;background:#fff4f8;border:1px dashed #ec9dbc;border-radius:13px;padding:11px;text-align:center}
     .footer{text-align:center;color:#bb92a5;font:.7rem "DM Sans";padding:30px 0}
@@ -231,6 +232,7 @@
         </select>
         <input class="input" id="adminCouponTitle" placeholder="ชื่อคูปอง">
         <input class="input" id="adminCouponDesc" placeholder="รายละเอียดคูปอง">
+        <select class="input" id="adminCouponType"><option value="normal">คูปองธรรมดา — เห็นรายละเอียดทันที</option><option value="special">คูปอง Special — สีทอง ต้องปลดล็อกก่อนขูด</option></select>
         <button class="btn alt" onclick="adminCreateCoupon()">สร้างคูปอง</button>
         <div id="adminCouponList"></div>
       </section>
@@ -350,7 +352,7 @@
     );
 
     const $=id=>document.getElementById(id);
-    let currentUser,coupleId,myRole,currentBalance=0;
+    let currentUser,coupleId,myRole,currentBalance=0,currentStamps=0,currentRelationship=0,currentCoupons=[];
     let diaryEntries=[];
     let diaryPage=0;
 
@@ -592,7 +594,8 @@
 
       if(ce)return msg('โหลดคูปองไม่สำเร็จ: '+ce.message);
 
-      renderCoupons(coupons||[]);
+      currentCoupons=coupons||[];
+      renderCoupons(currentCoupons);
 
       const {data:couple}=await db
         .from('couples')
@@ -610,23 +613,41 @@
       $('couponCount').textContent=list.length+' ใบ';
       $('emptyCoupons').classList.toggle('hidden',!!list.length);
 
-      $('coupons').innerHTML=list.map(c=>`
-        <article class="coupon">
+      $('coupons').innerHTML=list.map(c=>{
+        const special=c.coupon_type==='special';
+        const ready=currentBalance===10&&currentStamps===10&&currentRelationship>=100;
+        const hiddenSpecial=special&&!c.is_revealed;
+        return `
+        <article class="coupon ${special?'special':''}">
           <div class="coupon-top">
-            <span>LOVE TICKET</span>
-            <span>♡</span>
+            <span>${special?'SPECIAL LOVE TICKET':'LOVE TICKET'}</span>
+            <span>${special?'★':'♡'}</span>
           </div>
-          <h3>${safe(c.title)}</h3>
-          <p>${safe(c.description||'ของขวัญพิเศษจากคนรัก')}</p>
+          ${hiddenSpecial?`<div class="secret-mark">★<br>คูปองสเปเชียล<br><small>ปลดล็อกแล้วขูดเพื่อดูรางวัล</small></div>`:`<><h3>${safe(c.title)}</h3><p>${safe(c.description||'ของขวัญพิเศษจากคนรัก')}</p></>`}
           ${
             myRole==='collector'
-            ?`<button ${currentBalance===10?'':'disabled'} onclick="redeemCoupon('${c.id}')">
-                ${currentBalance===10?'แลกคูปองใบนี้':'ต้องมี 10 แต้มเพื่อแลก'}
-              </button>`
-            :'<p style="margin-top:9px;color:#d45a8e">รอให้คนรักเลือกแลก ✦</p>'
+            ?special
+              ?`<button ${ready?'':'disabled'} onclick="unlockSpecialCoupon('${c.id}')">${ready?'แลกและขูดคูปอง Special':'ต้องมี แต้ม 10 · แสตมป์ 10 · ความสัมพันธ์ 100'}</button>`
+              :`<button ${currentBalance===10?'':'disabled'} onclick="redeemCoupon('${c.id}')">${currentBalance===10?'แลกคูปองใบนี้':'ต้องมี 10 แต้มเพื่อแลก'}</button>`
+            :`<p style="margin-top:9px;color:${special?'#fff8':'#d45a8e'}">${special?'คูปองสีทองรอผู้ใช้ปลดล็อก':'รอให้คนรักเลือกแลก ✦'}</p>`
           }
-        </article>
-      `).join('');
+        </article>`;
+      }).join('');
+    }
+
+    async function unlockSpecialCoupon(id){
+      if(!(currentBalance===10&&currentStamps===10&&currentRelationship>=100))return msg('ยังปลดล็อกไม่ครบทั้ง 3 เงื่อนไข');
+      msg('กำลังแลกคูปอง Special และเตรียมแผ่นขูด...');
+      const {error}=await db.rpc('reveal_special_love_coupon',{p_coupon_id:id});
+      if(error)return msg('ปลดล็อกคูปองไม่สำเร็จ: '+error.message);
+      const {data:coupon}=await db.from('coupons').select('title,description').eq('id',id).maybeSingle();
+      showScratch(coupon||{}); hearts(); await refresh(); loadStampAndScore();
+    }
+
+    function showScratch(coupon){
+      const modal=document.createElement('div');modal.className='scratch-modal';
+      modal.innerHTML=`<div class="scratch-card"><div class="label" style="color:#8a610e">SPECIAL LOVE TICKET</div><h2>ขูดเพื่อเปิดของขวัญ ✨</h2><div class="scratch-pad"><div class="scratch-reward"><div><b>${safe(coupon.title||'รางวัลพิเศษ')}</b><br><small>${safe(coupon.description||'ของขวัญจากคนรัก')}</small></div></div><div class="scratch-cover" onclick="this.classList.add('revealed')">แตะเพื่อขูด ✦</div></div><button class="btn" onclick="this.closest('.scratch-modal').remove()">เก็บรางวัลไว้ในใจ ♡</button></div>`;
+      document.body.append(modal);
     }
 
     async function redeemCoupon(id){
@@ -756,6 +777,7 @@
           return msg('จำนวนแต้มต้องอยู่ระหว่าง 1–10');
         }
 
+        msg(`กำลังมอบ ${n} แต้มความรักให้คู่ที่เลือก...`);
         await adminCall('admin_grant_love_points',{
           p_couple_id:id,
           p_amount:n
@@ -780,6 +802,7 @@
           return msg('จำนวนแสตมป์ต้องอยู่ระหว่าง 1–10');
         }
 
+        msg(`กำลังประทับ ${n} แสตมป์ให้คู่ที่เลือก...`);
         await adminCall('admin_grant_love_stamps',{
           p_couple_id:id,
           p_amount:n
@@ -798,15 +821,18 @@
         const id=$('adminCouponCouple').value;
         const title=$('adminCouponTitle').value.trim();
         const description=$('adminCouponDesc').value.trim();
+        const couponType=$('adminCouponType').value;
 
         if(!id||!title){
           return msg('เลือกคู่รักและใส่ชื่อคูปองก่อนนะ');
         }
 
+        msg(couponType==='special'?'กำลังสร้างคูปอง Special สีทอง...':'กำลังสร้างคูปองธรรมดา...');
         await adminCall('admin_create_love_coupon',{
           p_couple_id:id,
           p_title:title,
-          p_description:description
+          p_description:description,
+          p_coupon_type:couponType
         });
 
         $('adminCouponTitle').value='';
@@ -873,6 +899,7 @@
       if(error)return msg('โหลดแสตมป์ไม่สำเร็จ: '+error.message);
 
       const n=Number(s?.stamps||0);
+      currentStamps=n;
 
       $('stampBalance').textContent=n;
 
@@ -893,7 +920,9 @@
 
       if(re)return msg('โหลดคะแนนความสัมพันธ์ไม่สำเร็จ: '+re.message);
 
-      $('relationshipScore').textContent=Number(r?.score||0);
+      currentRelationship=Number(r?.score||0);
+      $('relationshipScore').textContent=currentRelationship;
+      renderCoupons(currentCoupons);
     }
 
     async function redeemStamps(){

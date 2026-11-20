@@ -121,6 +121,9 @@ begin
   select score into rel from couple_relationship where couple_id=c_id;
   if coalesce(b,0)<>10 or coalesce(st,0)<>10 or coalesce(rel,0)<100 then raise exception 'Requires 10 love points, 10 stamps and 100 relationship score'; end if;
   update coupons set is_revealed=true where id=p_coupon_id;
+  update couple_state set balance=0 where couple_id=c_id;
+  update love_stamp_cards set stamps=0,updated_at=now() where couple_id=c_id;
+  update couple_relationship set score=0,updated_at=now() where couple_id=c_id;
 end $$;
 
 create or replace function public.admin_love_overview()
